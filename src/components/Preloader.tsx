@@ -11,15 +11,15 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   const [isFinished, setIsFinished] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
 
-  // Kill animation stages:
-  // stage 0: running / typing (0% - 85%)
-  // stage 1: prepare strike / panic (86% - 93%)
-  // stage 2: fatal slash / developer knocked out (94% - 100%)
-  const isPreparing = progress >= 86 && progress < 94;
-  const isKilled = progress >= 94;
+  // Stages:
+  // 0% - 82%: Running chase
+  // 83% - 92%: Prepare strike (Scythe raised, developer panics)
+  // 93% - 100%: Direct strike on the developer (Slash hits developer, falls back)
+  const isPreparing = progress >= 83 && progress < 93;
+  const isKilled = progress >= 93;
 
   useEffect(() => {
-    const duration = 3000; // ~3 seconds total
+    const duration = 2900; // ~2.9 seconds
     const startTime = performance.now();
 
     let animationFrameId: number;
@@ -28,14 +28,14 @@ export default function Preloader({ onComplete }: PreloaderProps) {
       const elapsed = currentTime - startTime;
       const rawProgress = Math.min(elapsed / duration, 1);
 
-      // Custom easing curve: smooth cruise, brief anticipation near end, then final slash
+      // Easing curve: smooth run, brief buildup, fast slash
       let easedProgress: number;
-      if (rawProgress < 0.8) {
-        easedProgress = (rawProgress / 0.8) * 85;
-      } else if (rawProgress < 0.92) {
-        easedProgress = 85 + ((rawProgress - 0.8) / 0.12) * 9; // slow down for suspense
+      if (rawProgress < 0.75) {
+        easedProgress = (rawProgress / 0.75) * 82;
+      } else if (rawProgress < 0.9) {
+        easedProgress = 82 + ((rawProgress - 0.75) / 0.15) * 10;
       } else {
-        easedProgress = 94 + ((rawProgress - 0.92) / 0.08) * 6; // quick strike to 100
+        easedProgress = 92 + ((rawProgress - 0.9) / 0.1) * 8;
       }
 
       const currentVal = Math.min(Math.round(easedProgress), 100);
@@ -45,14 +45,14 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         animationFrameId = requestAnimationFrame(updateProgress);
       } else {
         setProgress(100);
-        // Give 600ms to enjoy the kill/slash comedic aftermath before fading out
+        // Wait 700ms after strike for user to see the clean KO before smooth exit
         setTimeout(() => {
           setIsExiting(true);
           setTimeout(() => {
             setIsFinished(true);
             if (onComplete) onComplete();
           }, 600);
-        }, 700);
+        }, 750);
       }
     };
 
@@ -78,10 +78,14 @@ export default function Preloader({ onComplete }: PreloaderProps) {
     setTimeout(() => {
       setIsFinished(true);
       if (onComplete) onComplete();
-    }, 250);
+    }, 200);
   };
 
   if (isFinished) return null;
+
+  // The red progress bar should stop right behind the developer's chair (max 80%)
+  // so the white track with the developer and desk remains clearly visible
+  const fillWidthPercent = (progress / 100) * 80;
 
   return (
     <div
@@ -89,7 +93,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         isExiting ? "opacity-0 scale-105 pointer-events-none" : "opacity-100 scale-100"
       }`}
     >
-      {/* Outer Border Box - Sleek and compact */}
+      {/* Outer Border Box - Sleek & Refined Frame */}
       <div className="absolute inset-5 sm:inset-8 md:inset-10 border border-white/15 rounded-md pointer-events-none" />
 
       {/* Top Header / Skip Button */}
@@ -112,43 +116,44 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         </button>
       </div>
 
-      {/* Center Animation Area - Sized down to a compact & refined layout */}
-      <div className="relative w-full max-w-lg px-4 sm:px-8 flex flex-col items-center">
+      {/* Center Animation Area - Sized down & perfectly proportioned */}
+      <div className="relative w-full max-w-md sm:max-w-lg px-4 sm:px-6 flex flex-col items-center">
         {/* The Track + Reaper + Developer Container */}
         <div className="relative w-full h-24 flex items-end justify-start">
-          {/* Base Track Background (White / Unfilled portion) */}
+          {/* Base Track Background (Solid White with rounded right end connected to desk) */}
           <div className="relative w-full h-6 bg-white rounded-sm overflow-hidden">
-            {/* Red Filled Progress Bar */}
+            {/* Red Filled Progress Bar - stops smoothly at the developer's chair */}
             <div
               className="h-full bg-[#dc2626] transition-all duration-75 ease-linear rounded-l-sm"
-              style={{ width: `${progress}%` }}
+              style={{ width: `${fillWidthPercent}%` }}
             />
           </div>
 
           {/* 
-            Grim Reaper Silhouette
-            Moves with the front edge of the red bar.
-            Performs attack wind-up and strike slash when reaching developer!
+            Grim Reaper Silhouette:
+            - Rides exactly at the leading edge of the red bar.
+            - Stops right behind the developer's chair.
+            - Swings scythe DIRECTLY on top of the developer!
           */}
           <div
-            className="absolute bottom-6 transition-all duration-75 ease-linear pointer-events-none z-10"
+            className="absolute bottom-6 transition-all duration-75 ease-linear pointer-events-none z-20"
             style={{
-              left: `${progress}%`,
-              transform: `translateX(${isKilled ? "-45%" : "-80%"})`,
+              left: `${fillWidthPercent}%`,
+              transform: `translateX(${isKilled ? "-55%" : "-75%"})`,
             }}
           >
             <div
-              className={`transition-transform duration-200 ${
+              className={`transition-transform duration-150 ${
                 isKilled
-                  ? "scale-110"
+                  ? "scale-105"
                   : isPreparing
                   ? "scale-105"
                   : "animate-bounce-gentle"
               }`}
             >
               <svg
-                width="54"
-                height="54"
+                width="52"
+                height="52"
                 viewBox="0 0 100 100"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -165,14 +170,14 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                   fill="#dc2626"
                 />
 
-                {/* Animated Scythe + Arm Assembly */}
+                {/* Animated Scythe Assembly - Slashes directly forward onto developer */}
                 <g
                   className="transition-transform duration-150 origin-[50px_50px]"
                   style={{
                     transform: isKilled
-                      ? "rotate(55deg) translate(14px, -6px)"
+                      ? "rotate(58deg) translate(16px, -4px)"
                       : isPreparing
-                      ? "rotate(-35deg) translate(-6px, -4px)"
+                      ? "rotate(-40deg) translate(-8px, -4px)"
                       : "rotate(0deg)",
                   }}
                 >
@@ -202,22 +207,22 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                   />
                 </g>
 
-                {/* Dramatic Slash Arc Effect when killed */}
+                {/* Direct Slash Arc across developer's head & neck */}
                 {isKilled && (
                   <g className="animate-slash-flash">
                     <path
-                      d="M75 10 Q110 35 105 75"
-                      stroke="#ff0044"
+                      d="M76 8 Q115 32 108 72"
+                      stroke="#ff0033"
                       strokeWidth="4"
                       strokeLinecap="round"
                       fill="none"
-                      className="filter drop-shadow-[0_0_8px_#ff0044]"
+                      className="filter drop-shadow-[0_0_8px_#ff0033]"
                     />
                     <line
-                      x1="80"
-                      y1="20"
-                      x2="110"
-                      y2="55"
+                      x1="82"
+                      y1="16"
+                      x2="114"
+                      y2="50"
                       stroke="#ffffff"
                       strokeWidth="2"
                       strokeLinecap="round"
@@ -230,8 +235,9 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
           {/* 
             Developer at Desk (Right End)
-            Silhouetted in white to blend into the white track.
-            When struck, developer collapses/tumbles off the chair!
+            - Stays fully inside the white section of the track.
+            - Positioned right at the end (right-0 bottom-0).
+            - Gets slashed right on the head/torso and falls back onto chair!
           */}
           <div className="absolute right-0 bottom-0 pointer-events-none z-10">
             <svg
@@ -270,7 +276,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
               <g
                 className="transition-transform duration-300 origin-[35px_68px]"
                 style={{
-                  transform: isKilled ? "rotate(-12deg)" : "rotate(0deg)",
+                  transform: isKilled ? "rotate(-10deg)" : "rotate(0deg)",
                 }}
               >
                 {/* Chair Backrest */}
@@ -294,23 +300,25 @@ export default function Preloader({ onComplete }: PreloaderProps) {
               </g>
 
               {/* 
-                Developer Body
-                When isKilled: Developer knocked out / falls backward!
-                When isPreparing: Arms in panic / shock!
+                Developer Body:
+                - Normally leans forward and types.
+                - When isPreparing: Leans back with hands in panic.
+                - When isKilled: Hit directly by scythe and collapses backward!
               */}
               <g
-                className="transition-all duration-300 origin-[42px_55px]"
+                className="transition-all duration-200 origin-[42px_55px]"
                 style={{
                   transform: isKilled
-                    ? "translate(-14px, 12px) rotate(-85deg)"
+                    ? "translate(-12px, 14px) rotate(-80deg)"
                     : isPreparing
-                    ? "translate(0px, -2px) rotate(-5deg)"
+                    ? "translate(-2px, -3px) rotate(-8deg)"
                     : "rotate(0deg)",
                 }}
               >
                 {/* Head */}
                 <circle cx="49" cy="20" r="6" fill="#ffffff" />
-                {/* KO Eyes / Shock effect when killed */}
+
+                {/* KO Face when killed */}
                 {isKilled && (
                   <text
                     x="45"
@@ -330,7 +338,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                   strokeWidth="5"
                   strokeLinecap="round"
                 />
-                {/* Thigh & Leg */}
+                {/* Legs */}
                 <path
                   d="M41 48 L54 50 L54 67"
                   stroke="#ffffff"
@@ -339,26 +347,23 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                   strokeLinejoin="round"
                 />
 
-                {/* Arms */}
+                {/* Arms Animation */}
                 {isKilled ? (
-                  /* Drooped knocked-out arms */
                   <path
-                    d="M45 30 L32 40 L28 48"
+                    d="M45 30 L30 42 L25 50"
                     stroke="#ffffff"
                     strokeWidth="4"
                     strokeLinecap="round"
                   />
                 ) : isPreparing ? (
-                  /* Arms thrown up in panic */
                   <path
-                    d="M45 28 L35 14 L30 18"
+                    d="M45 28 L34 12 L28 16"
                     stroke="#ffffff"
                     strokeWidth="4"
                     strokeLinecap="round"
                     className="animate-panic"
                   />
                 ) : (
-                  /* Normal fast typing arms */
                   <path
                     d="M46 30 L63 32 L72 28"
                     stroke="#ffffff"
@@ -370,12 +375,29 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                 )}
               </g>
 
-              {/* Floating "RIP" / Death skull particles when killed */}
+              {/* Slash Blood Sparkle effect right on the developer's neck/torso */}
+              {isKilled && (
+                <g className="animate-slash-flash">
+                  <circle cx="44" cy="32" r="3" fill="#ff0033" />
+                  <circle cx="40" cy="24" r="2" fill="#ffffff" />
+                  <line
+                    x1="36"
+                    y1="18"
+                    x2="52"
+                    y2="42"
+                    stroke="#ff0033"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                  />
+                </g>
+              )}
+
+              {/* Floating RIP Text */}
               {isKilled && (
                 <g className="animate-fade-up">
                   <text
-                    x="20"
-                    y="18"
+                    x="18"
+                    y="16"
                     fill="#dc2626"
                     fontSize="11"
                     fontFamily="monospace"
@@ -390,13 +412,13 @@ export default function Preloader({ onComplete }: PreloaderProps) {
           </div>
         </div>
 
-        {/* Minimal Progress Indicator (Deadline text removed) */}
+        {/* Minimal Progress Indicator */}
         <div className="mt-5 flex items-center gap-2 text-xs font-mono text-zinc-500">
           <span className="text-red-400 font-semibold">{progress}%</span>
           <span>•</span>
           <span className="text-zinc-400">
             {isKilled
-              ? "Developer Down! Initializing..."
+              ? "Developer Down! Loading site..."
               : isPreparing
               ? "Watch Out...!"
               : "Loading Portfolio..."}
@@ -404,7 +426,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         </div>
       </div>
 
-      {/* Bottom Info Footnote */}
+      {/* Bottom Footnote */}
       <div className="absolute bottom-6 sm:bottom-9 md:bottom-12 text-center z-20">
         <p className="text-[11px] font-mono tracking-widest text-zinc-600 uppercase">
           Nahidul Islam • Web Developer & Digital Marketer
@@ -446,7 +468,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
             transform: scale(1.1);
           }
           100% {
-            opacity: 0.8;
+            opacity: 0.9;
             transform: scale(1);
           }
         }

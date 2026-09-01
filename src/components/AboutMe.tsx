@@ -8,13 +8,13 @@ export default function AboutMe() {
   const stats = [
     {
       icon: <Award className="w-5 h-5 text-cyan-300" />,
-      value: "3+",
+      value: "1+",
       label: "Years Experience",
       detail: "Full-stack development & SEO",
     },
     {
       icon: <Briefcase className="w-5 h-5 text-cyan-300" />,
-      value: "100+",
+      value: "50+",
       label: "Projects Completed",
       detail: "Web apps & growth campaigns",
     },

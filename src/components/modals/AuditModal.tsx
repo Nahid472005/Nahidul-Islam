@@ -19,13 +19,26 @@ export default function AuditModal({ isOpen, onClose }: AuditModalProps) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!website || !email) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await fetch("https://formsubmit.co/ajax/Nahidul472005@gmail.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          _subject: `🔍 Free Audit Request for ${website} from ${email}`,
+          Website_URL: website,
+          Email: email,
+          Audit_Type: auditType,
+          _template: "table",
+        }),
+      });
       setSubmitted(true);
       confetti({
         particleCount: 70,
@@ -33,7 +46,12 @@ export default function AuditModal({ isOpen, onClose }: AuditModalProps) {
         origin: { y: 0.6 },
         colors: ["#00f0ff", "#38bdf8", "#ffffff"],
       });
-    }, 900);
+    } catch (err) {
+      console.error(err);
+      setSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

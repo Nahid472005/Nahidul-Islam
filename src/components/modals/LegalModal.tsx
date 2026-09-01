@@ -52,7 +52,7 @@ export default function LegalModal({ title, onClose }: LegalModalProps) {
               <strong>Intellectual Property:</strong> All custom website code, marketing roadmaps, and digital assets created for clients become the intellectual property of the respective client upon project completion.
             </p>
             <p>
-              For any specific inquiries or custom agreements, please reach out directly at <span className="text-cyan-300">nahidul@example.com</span>.
+              For any specific inquiries or custom agreements, please reach out directly at <span className="text-cyan-300">Nahidul472005@gmail.com</span>.
             </p>
           </div>
 

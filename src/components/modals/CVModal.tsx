@@ -13,7 +13,7 @@ export default function CVModal({ isOpen, onClose }: CVModalProps) {
 
   const handleDownload = () => {
     // Generate text/markdown or trigger PDF download
-    const cvText = `NAHIDUL ISLAM — Digital Marketer & Web Developer\n\nExperience: 3+ Years\nProjects: 100+ Completed\nSpecialties: Next.js, React, TypeScript, SEO, Digital Marketing, YouTube SEO, Google & Meta Ads\nContact: nahidul@example.com | Dhaka, Bangladesh`;
+    const cvText = `NAHIDUL ISLAM — Digital Marketer & Web Developer\n\nExperience: 3+ Years\nProjects: 100+ Completed\nSpecialties: Next.js, React, TypeScript, SEO, Digital Marketing, YouTube SEO, Google & Meta Ads\nContact: Nahidul472005@gmail.com | WhatsApp: +8801609750137 | Dhaka, Bangladesh`;
     const blob = new Blob([cvText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

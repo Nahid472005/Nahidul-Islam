@@ -11,15 +11,17 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   const [isFinished, setIsFinished] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
 
-  // Stages:
-  // 0% - 82%: Running chase
-  // 83% - 92%: Prepare strike (Scythe raised, developer panics)
-  // 93% - 100%: Direct strike on the developer (Slash hits developer, falls back)
-  const isPreparing = progress >= 83 && progress < 93;
-  const isKilled = progress >= 93;
+  // Exact 4-stage synchronization:
+  // 1. RUNNING (0% - 78%): Reaper chases, Developer furiously types.
+  // 2. WINDUP (79% - 88%): Reaper reaches chair, raises scythe high. Developer stops typing & panics.
+  // 3. SLASHING (89% - 93%): Scythe rapidly swings down in a high-speed arc towards the desk.
+  // 4. IMPACT / KO (94% - 100%): Scythe slams into the desk/keyboard! EXACTLY now, developer collapses backward with sparks!
+  const isWindup = progress >= 79 && progress < 89;
+  const isSlashing = progress >= 89 && progress < 94;
+  const isImpact = progress >= 94;
 
   useEffect(() => {
-    const duration = 2900; // ~2.9 seconds
+    const duration = 3000; // ~3.0 seconds
     const startTime = performance.now();
 
     let animationFrameId: number;
@@ -28,14 +30,20 @@ export default function Preloader({ onComplete }: PreloaderProps) {
       const elapsed = currentTime - startTime;
       const rawProgress = Math.min(elapsed / duration, 1);
 
-      // Easing curve: smooth run, brief buildup, fast slash
+      // Custom easing curve for perfect dramatic timing:
+      // - Fast approach to 78%
+      // - Suspenseful windup pause from 79% to 88%
+      // - Lightning fast slash swing from 89% to 94%
+      // - Impact hold & aftermath from 94% to 100%
       let easedProgress: number;
-      if (rawProgress < 0.75) {
-        easedProgress = (rawProgress / 0.75) * 82;
-      } else if (rawProgress < 0.9) {
-        easedProgress = 82 + ((rawProgress - 0.75) / 0.15) * 10;
+      if (rawProgress < 0.65) {
+        easedProgress = (rawProgress / 0.65) * 78;
+      } else if (rawProgress < 0.82) {
+        easedProgress = 78 + ((rawProgress - 0.65) / 0.17) * 10; // Windup (78 -> 88)
+      } else if (rawProgress < 0.88) {
+        easedProgress = 88 + ((rawProgress - 0.82) / 0.06) * 6; // Fast slash (88 -> 94)
       } else {
-        easedProgress = 92 + ((rawProgress - 0.9) / 0.1) * 8;
+        easedProgress = 94 + ((rawProgress - 0.88) / 0.12) * 6; // Impact (94 -> 100)
       }
 
       const currentVal = Math.min(Math.round(easedProgress), 100);
@@ -45,14 +53,14 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         animationFrameId = requestAnimationFrame(updateProgress);
       } else {
         setProgress(100);
-        // Wait 700ms after strike for user to see the clean KO before smooth exit
+        // Let the user see the fallen developer and embedded scythe for 800ms before smooth fade out
         setTimeout(() => {
           setIsExiting(true);
           setTimeout(() => {
             setIsFinished(true);
             if (onComplete) onComplete();
           }, 600);
-        }, 750);
+        }, 800);
       }
     };
 
@@ -83,9 +91,8 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
   if (isFinished) return null;
 
-  // The red progress bar should stop right behind the developer's chair (max 80%)
-  // so the white track with the developer and desk remains clearly visible
-  const fillWidthPercent = (progress / 100) * 80;
+  // The red progress bar fills up smoothly to 80% (right behind the chair)
+  const fillWidthPercent = Math.min((progress / 100) * 80, 80);
 
   return (
     <div
@@ -93,7 +100,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         isExiting ? "opacity-0 scale-105 pointer-events-none" : "opacity-100 scale-100"
       }`}
     >
-      {/* Outer Border Box - Sleek & Refined Frame */}
+      {/* Outer Border Box - Refined Frame */}
       <div className="absolute inset-5 sm:inset-8 md:inset-10 border border-white/15 rounded-md pointer-events-none" />
 
       {/* Top Header / Skip Button */}
@@ -116,13 +123,13 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         </button>
       </div>
 
-      {/* Center Animation Area - Sized down & perfectly proportioned */}
+      {/* Center Animation Area */}
       <div className="relative w-full max-w-md sm:max-w-lg px-4 sm:px-6 flex flex-col items-center">
         {/* The Track + Reaper + Developer Container */}
         <div className="relative w-full h-24 flex items-end justify-start">
-          {/* Base Track Background (Solid White with rounded right end connected to desk) */}
+          {/* Base Track Background (Solid White with rounded corners) */}
           <div className="relative w-full h-6 bg-white rounded-sm overflow-hidden">
-            {/* Red Filled Progress Bar - stops smoothly at the developer's chair */}
+            {/* Red Filled Progress Bar - stops smoothly right behind the chair */}
             <div
               className="h-full bg-[#dc2626] transition-all duration-75 ease-linear rounded-l-sm"
               style={{ width: `${fillWidthPercent}%` }}
@@ -131,22 +138,26 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
           {/* 
             Grim Reaper Silhouette:
-            - Rides exactly at the leading edge of the red bar.
-            - Stops right behind the developer's chair.
-            - Swings scythe DIRECTLY on top of the developer!
+            - Rides at the tip of the red progress bar.
+            - Stops right behind the chair.
+            - Windup: Raises scythe high.
+            - Slash: Swings scythe down right onto the desk.
+            - Impact: Scythe lands and lodges onto the desk.
           */}
           <div
             className="absolute bottom-6 transition-all duration-75 ease-linear pointer-events-none z-20"
             style={{
               left: `${fillWidthPercent}%`,
-              transform: `translateX(${isKilled ? "-55%" : "-75%"})`,
+              transform: `translateX(${isImpact || isSlashing ? "-52%" : "-75%"})`,
             }}
           >
             <div
               className={`transition-transform duration-150 ${
-                isKilled
+                isImpact
                   ? "scale-105"
-                  : isPreparing
+                  : isSlashing
+                  ? "scale-110"
+                  : isWindup
                   ? "scale-105"
                   : "animate-bounce-gentle"
               }`}
@@ -170,18 +181,23 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                   fill="#dc2626"
                 />
 
-                {/* Animated Scythe Assembly - Slashes directly forward onto developer */}
+                {/* 
+                  Animated Scythe Assembly:
+                  - Windup: rotates up-back (-48deg)
+                  - Slashing / Impact: swings all the way forward & down (64deg) to slam directly on the desk!
+                */}
                 <g
-                  className="transition-transform duration-150 origin-[50px_50px]"
+                  className="origin-[48px_48px] transition-transform duration-100 ease-in"
                   style={{
-                    transform: isKilled
-                      ? "rotate(58deg) translate(16px, -4px)"
-                      : isPreparing
-                      ? "rotate(-40deg) translate(-8px, -4px)"
-                      : "rotate(0deg)",
+                    transform:
+                      isImpact || isSlashing
+                        ? "rotate(65deg) translate(18px, -2px)"
+                        : isWindup
+                        ? "rotate(-48deg) translate(-10px, -6px)"
+                        : "rotate(0deg)",
                   }}
                 >
-                  {/* Reaper Arm holding scythe */}
+                  {/* Reaper Arm */}
                   <path
                     d="M52 46 C58 44 65 42 72 40 C75 39 77 42 74 44 C68 47 60 50 54 52 Z"
                     fill="#dc2626"
@@ -189,7 +205,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                   {/* Long Scythe Handle */}
                   <line
                     x1="72"
-                    y1="12"
+                    y1="10"
                     x2="55"
                     y2="92"
                     stroke="#dc2626"
@@ -198,30 +214,30 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                   />
                   {/* Scythe Crescent Blade */}
                   <path
-                    d="M72 13 C82 9 96 11 100 25 C95 21 85 19 73 19 C70 19 68 15 72 13 Z"
+                    d="M72 11 C82 7 96 9 100 23 C95 19 85 17 73 17 C70 17 68 13 72 11 Z"
                     fill="#dc2626"
                   />
                   <path
-                    d="M72 12 Q90 7 101 28 Q87 15 71 19 Z"
+                    d="M72 10 Q90 5 101 26 Q87 13 71 17 Z"
                     fill="#b91c1c"
                   />
                 </g>
 
-                {/* Direct Slash Arc across developer's head & neck */}
-                {isKilled && (
+                {/* Slash trail arc when swinging down onto the desk */}
+                {(isSlashing || isImpact) && (
                   <g className="animate-slash-flash">
                     <path
-                      d="M76 8 Q115 32 108 72"
+                      d="M65 -5 Q115 15 110 65"
                       stroke="#ff0033"
-                      strokeWidth="4"
+                      strokeWidth="3.5"
                       strokeLinecap="round"
                       fill="none"
-                      className="filter drop-shadow-[0_0_8px_#ff0033]"
+                      className="filter drop-shadow-[0_0_10px_#ff0033]"
                     />
                     <line
-                      x1="82"
-                      y1="16"
-                      x2="114"
+                      x1="80"
+                      y1="10"
+                      x2="112"
                       y2="50"
                       stroke="#ffffff"
                       strokeWidth="2"
@@ -235,11 +251,17 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
           {/* 
             Developer at Desk (Right End)
-            - Stays fully inside the white section of the track.
-            - Positioned right at the end (right-0 bottom-0).
-            - Gets slashed right on the head/torso and falls back onto chair!
+            - Solid white silhouette attached to the white track.
+            - Types until Reaper reaches windup.
+            - In windup: freezes and panics.
+            - In slashing: anticipates the strike.
+            - ON IMPACT: Blade slams on desk, developer collapses backward!
           */}
-          <div className="absolute right-0 bottom-0 pointer-events-none z-10">
+          <div
+            className={`absolute right-0 bottom-0 pointer-events-none z-10 ${
+              isImpact ? "animate-desk-shake" : ""
+            }`}
+          >
             <svg
               width="74"
               height="70"
@@ -265,7 +287,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
               {/* Monitor Screen Backlight */}
               <polygon
                 points="77,12 60,20 63,28 78,24"
-                fill={isKilled ? "rgba(220, 38, 38, 0.4)" : "rgba(0, 240, 255, 0.25)"}
+                fill={isImpact ? "rgba(220, 38, 38, 0.5)" : "rgba(0, 240, 255, 0.25)"}
                 className="animate-pulse"
               />
               {/* Monitor Stand */}
@@ -274,9 +296,9 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
               {/* Office Chair */}
               <g
-                className="transition-transform duration-300 origin-[35px_68px]"
+                className="origin-[35px_68px] transition-transform duration-300"
                 style={{
-                  transform: isKilled ? "rotate(-10deg)" : "rotate(0deg)",
+                  transform: isImpact ? "rotate(-12deg)" : "rotate(0deg)",
                 }}
               >
                 {/* Chair Backrest */}
@@ -301,16 +323,17 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
               {/* 
                 Developer Body:
-                - Normally leans forward and types.
-                - When isPreparing: Leans back with hands in panic.
-                - When isKilled: Hit directly by scythe and collapses backward!
+                - Types during 0% - 78%
+                - Panics during 79% - 88%
+                - Prepares/freezes during 89% - 93%
+                - Collapses ONLY upon impact at >= 94%!
               */}
               <g
-                className="transition-all duration-200 origin-[42px_55px]"
+                className="origin-[42px_55px] transition-transform duration-200 ease-out"
                 style={{
-                  transform: isKilled
-                    ? "translate(-12px, 14px) rotate(-80deg)"
-                    : isPreparing
+                  transform: isImpact
+                    ? "translate(-14px, 14px) rotate(-85deg)"
+                    : isWindup || isSlashing
                     ? "translate(-2px, -3px) rotate(-8deg)"
                     : "rotate(0deg)",
                 }}
@@ -318,8 +341,8 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                 {/* Head */}
                 <circle cx="49" cy="20" r="6" fill="#ffffff" />
 
-                {/* KO Face when killed */}
-                {isKilled && (
+                {/* KO Face appears strictly upon impact */}
+                {isImpact && (
                   <text
                     x="45"
                     y="22"
@@ -347,15 +370,17 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                   strokeLinejoin="round"
                 />
 
-                {/* Arms Animation */}
-                {isKilled ? (
+                {/* Arms Animation based on exact state */}
+                {isImpact ? (
+                  /* Knocked out drooped arms */
                   <path
                     d="M45 30 L30 42 L25 50"
                     stroke="#ffffff"
                     strokeWidth="4"
                     strokeLinecap="round"
                   />
-                ) : isPreparing ? (
+                ) : isWindup || isSlashing ? (
+                  /* Raised terrified hands */
                   <path
                     d="M45 28 L34 12 L28 16"
                     stroke="#ffffff"
@@ -364,6 +389,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                     className="animate-panic"
                   />
                 ) : (
+                  /* Normal rapid typing */
                   <path
                     d="M46 30 L63 32 L72 28"
                     stroke="#ffffff"
@@ -375,29 +401,35 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                 )}
               </g>
 
-              {/* Slash Blood Sparkle effect right on the developer's neck/torso */}
-              {isKilled && (
+              {/* Slash impact Sparks directly ON the desk & developer upon landing */}
+              {isImpact && (
                 <g className="animate-slash-flash">
-                  <circle cx="44" cy="32" r="3" fill="#ff0033" />
-                  <circle cx="40" cy="24" r="2" fill="#ffffff" />
+                  {/* Blade impact point on desk */}
+                  <circle cx="68" cy="30" r="3.5" fill="#ff0033" />
+                  <circle cx="68" cy="30" r="1.5" fill="#ffffff" />
+                  {/* Slash cut mark on desk */}
                   <line
-                    x1="36"
-                    y1="18"
-                    x2="52"
-                    y2="42"
+                    x1="62"
+                    y1="25"
+                    x2="74"
+                    y2="35"
                     stroke="#ff0033"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                   />
+                  {/* Sparks */}
+                  <circle cx="60" cy="20" r="1.5" fill="#ff0033" />
+                  <circle cx="76" cy="22" r="1.5" fill="#ffaa00" />
+                  <circle cx="55" cy="28" r="1.2" fill="#ffffff" />
                 </g>
               )}
 
-              {/* Floating RIP Text */}
-              {isKilled && (
+              {/* Floating RIP text */}
+              {isImpact && (
                 <g className="animate-fade-up">
                   <text
-                    x="18"
-                    y="16"
+                    x="16"
+                    y="15"
                     fill="#dc2626"
                     fontSize="11"
                     fontFamily="monospace"
@@ -417,9 +449,11 @@ export default function Preloader({ onComplete }: PreloaderProps) {
           <span className="text-red-400 font-semibold">{progress}%</span>
           <span>•</span>
           <span className="text-zinc-400">
-            {isKilled
+            {isImpact
               ? "Developer Down! Loading site..."
-              : isPreparing
+              : isSlashing
+              ? "STRIKE!"
+              : isWindup
               ? "Watch Out...!"
               : "Loading Portfolio..."}
           </span>
@@ -455,21 +489,35 @@ export default function Preloader({ onComplete }: PreloaderProps) {
             transform: rotate(0deg);
           }
           50% {
-            transform: rotate(-10deg);
+            transform: rotate(-12deg);
           }
         }
         @keyframes slashFlash {
           0% {
             opacity: 0;
-            transform: scale(0.8);
+            transform: scale(0.6);
           }
-          50% {
+          40% {
             opacity: 1;
-            transform: scale(1.1);
+            transform: scale(1.15);
           }
           100% {
             opacity: 0.9;
             transform: scale(1);
+          }
+        }
+        @keyframes deskShake {
+          0%, 100% {
+            transform: translateY(0) rotate(0deg);
+          }
+          25% {
+            transform: translateY(-2px) rotate(-1deg);
+          }
+          50% {
+            transform: translateY(2px) rotate(1deg);
+          }
+          75% {
+            transform: translateY(-1px) rotate(0deg);
           }
         }
         @keyframes fadeUpText {
@@ -493,6 +541,9 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         }
         .animate-slash-flash {
           animation: slashFlash 0.3s ease-out forwards;
+        }
+        .animate-desk-shake {
+          animation: deskShake 0.25s ease-in-out;
         }
         .animate-fade-up {
           animation: fadeUpText 0.4s ease-out forwards;

@@ -9,7 +9,9 @@ import {
   InstagramIcon,
   GithubIcon,
   FacebookIcon,
+  TikTokIcon,
 } from "./icons/BrandIcons";
+import { SOCIAL_PLATFORMS } from "@/data/socialLinks";
 
 interface FooterProps {
   onOpenLegal?: (title: string) => void;
@@ -20,38 +22,26 @@ export default function Footer({ onOpenLegal }: FooterProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const socials = [
-    {
-      name: "LinkedIn",
-      href: "https://linkedin.com/in/nahidul-islam",
-      icon: <LinkedinIcon className="w-4 h-4" />,
-    },
-    {
-      name: "YouTube",
-      href: "https://youtube.com/@nahidul.islam",
-      icon: <YoutubeIcon className="w-4 h-4" />,
-    },
-    {
-      name: "GitHub",
-      href: "https://github.com/nahidul-islam",
-      icon: <GithubIcon className="w-4 h-4" />,
-    },
-    {
-      name: "X",
-      href: "https://x.com/nahidul_islam",
-      icon: <TwitterXIcon className="w-4 h-4" />,
-    },
-    {
-      name: "Instagram",
-      href: "https://instagram.com/nahidul.islam",
-      icon: <InstagramIcon className="w-4 h-4" />,
-    },
-    {
-      name: "Facebook",
-      href: "https://facebook.com/nahidul.islam",
-      icon: <FacebookIcon className="w-4 h-4" />,
-    },
-  ];
+  const getFooterIcon = (id: string) => {
+    switch (id) {
+      case "linkedin":
+        return <LinkedinIcon className="w-4 h-4" />;
+      case "youtube":
+        return <YoutubeIcon className="w-4 h-4" />;
+      case "github":
+        return <GithubIcon className="w-4 h-4" />;
+      case "twitter":
+        return <TwitterXIcon className="w-4 h-4" />;
+      case "instagram":
+        return <InstagramIcon className="w-4 h-4" />;
+      case "facebook":
+        return <FacebookIcon className="w-4 h-4" />;
+      case "tiktok":
+        return <TikTokIcon className="w-4 h-4 fill-cyan-300" />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <footer className="relative w-full py-12 sm:py-16 bg-black border-t border-cyan-950/30">
@@ -71,16 +61,16 @@ export default function Footer({ onOpenLegal }: FooterProps) {
 
           {/* Social Icons */}
           <div className="flex items-center gap-3">
-            {socials.map((s) => (
+            {SOCIAL_PLATFORMS.map((s) => (
               <a
-                key={s.name}
-                href={s.href}
+                key={s.id}
+                href={s.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={s.name}
                 className="flex items-center justify-center w-9 h-9 rounded-full bg-slate-950/80 border border-cyan-500/30 text-slate-400 hover:text-cyan-300 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] transition-all duration-300 hover:scale-110"
               >
-                {s.icon}
+                {getFooterIcon(s.id)}
               </a>
             ))}
           </div>

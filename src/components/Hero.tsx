@@ -11,6 +11,7 @@ import {
   InstagramIcon,
 } from "./icons/BrandIcons";
 import BrandStrip from "./BrandStrip";
+import { SOCIAL_PLATFORMS } from "@/data/socialLinks";
 
 interface HeroProps {
   onOpenWorkModal?: () => void;
@@ -45,28 +46,25 @@ export default function Hero({ onOpenWorkModal, onOpenCVModal }: HeroProps) {
     mouseY.set(0);
   };
 
-  const socialLinks = [
-    {
-      name: "LinkedIn",
-      href: "https://linkedin.com/in/nahidul-islam",
-      icon: <LinkedinIcon className="w-4 h-4" />,
-    },
-    {
-      name: "YouTube",
-      href: "https://youtube.com/@nahidul.islam",
-      icon: <YoutubeIcon className="w-4 h-4" />,
-    },
-    {
-      name: "X",
-      href: "https://x.com/nahidul_islam",
-      icon: <TwitterXIcon className="w-4 h-4" />,
-    },
-    {
-      name: "Instagram",
-      href: "https://instagram.com/nahidul.islam",
-      icon: <InstagramIcon className="w-4 h-4" />,
-    },
-  ];
+  // Pull top 4 social links from central data
+  const getSocialIcon = (id: string) => {
+    switch (id) {
+      case "linkedin":
+        return <LinkedinIcon className="w-4 h-4" />;
+      case "youtube":
+        return <YoutubeIcon className="w-4 h-4" />;
+      case "twitter":
+        return <TwitterXIcon className="w-4 h-4" />;
+      case "instagram":
+        return <InstagramIcon className="w-4 h-4" />;
+      default:
+        return null;
+    }
+  };
+
+  const heroSocials = SOCIAL_PLATFORMS.filter((s) =>
+    ["linkedin", "youtube", "twitter", "instagram"].includes(s.id)
+  );
 
   return (
     <section
@@ -203,10 +201,10 @@ export default function Hero({ onOpenWorkModal, onOpenCVModal }: HeroProps) {
               transition={{ duration: 0.8, delay: 0.6 }}
               className="absolute -right-2 sm:-right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3.5 z-20"
             >
-              {socialLinks.map((s, idx) => (
+              {heroSocials.map((s, idx) => (
                 <motion.a
-                  key={s.name}
-                  href={s.href}
+                  key={s.id}
+                  href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.name}
@@ -221,7 +219,7 @@ export default function Hero({ onOpenWorkModal, onOpenCVModal }: HeroProps) {
                   }}
                   className="flex items-center justify-center w-10 h-10 rounded-full bg-black/85 backdrop-blur-md border border-cyan-500/40 text-slate-300 hover:text-cyan-300 hover:border-cyan-300 hover:shadow-[0_0_18px_rgba(0,240,255,0.6)] transition-all duration-300 hover:scale-115"
                 >
-                  {s.icon}
+                  {getSocialIcon(s.id)}
                 </motion.a>
               ))}
             </motion.div>

@@ -98,10 +98,10 @@ export default function ContactSection() {
                     Email
                   </h3>
                   <a
-                    href="mailto:nahidul@example.com"
+                    href="mailto:nahidul472005@gmail.com"
                     className="text-sm sm:text-base font-semibold text-white hover:text-cyan-300 transition-colors"
                   >
-                    nahidul@example.com
+                    nahidul472005@gmail.com
                   </a>
                 </div>
               </div>
@@ -115,10 +115,10 @@ export default function ContactSection() {
                     Phone
                   </h3>
                   <a
-                    href="tel:+8801234567890"
+                    href="tel:+8801609750137"
                     className="text-sm sm:text-base font-semibold text-white hover:text-cyan-300 transition-colors"
                   >
-                    +880 1234-567890
+                    +880 1609750137
                   </a>
                 </div>
               </div>

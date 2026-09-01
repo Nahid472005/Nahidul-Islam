@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { VIDEOS_DATA, VideoItem } from "@/data/videos";
+import { SOCIAL_PLATFORMS } from "@/data/socialLinks";
 import { Play, ArrowRight } from "lucide-react";
 import { YoutubeIcon } from "./icons/BrandIcons";
 
@@ -11,6 +12,10 @@ interface YouTubeSectionProps {
 }
 
 export default function YouTubeSection({ onSelectVideo }: YouTubeSectionProps) {
+  const youtubeLink =
+    SOCIAL_PLATFORMS.find((s) => s.id === "youtube")?.url ||
+    "https://www.youtube.com/@NahidulIslam-47";
+
   return (
     <section id="blog" className="relative w-full py-20 sm:py-28 bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -46,7 +51,7 @@ export default function YouTubeSection({ onSelectVideo }: YouTubeSectionProps) {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <a
-              href="https://youtube.com/@nahidul.islam"
+              href={youtubeLink}
               target="_blank"
               rel="noopener noreferrer"
               className="group inline-flex items-center gap-2.5 px-6 py-3 rounded-full text-xs sm:text-sm font-bold text-black bg-cyan-400 hover:bg-cyan-300 shadow-[0_0_20px_rgba(0,240,255,0.45)] hover:shadow-[0_0_30px_rgba(0,240,255,0.75)] transition-all duration-300 hover:scale-105"

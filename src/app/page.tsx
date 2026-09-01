@@ -20,6 +20,7 @@ import WorkModal from "@/components/modals/WorkModal";
 import AuditModal from "@/components/modals/AuditModal";
 import CVModal from "@/components/modals/CVModal";
 import LegalModal from "@/components/modals/LegalModal";
+import Preloader from "@/components/Preloader";
 
 import { VideoItem } from "@/data/videos";
 import { ServiceItem } from "@/data/services";
@@ -38,6 +39,9 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen w-full bg-black text-white selection:bg-cyan-500/30 selection:text-white">
+      {/* Intro Death vs Developer Preloader Animation */}
+      <Preloader />
+
       {/* 
         ABSOLUTE RULE:
         THE BACKGROUND MUST ALWAYS REMAIN STATIC BLACK (#000000).

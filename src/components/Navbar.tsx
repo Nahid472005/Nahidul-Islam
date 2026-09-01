@@ -15,8 +15,8 @@ export default function Navbar({ onOpenAudit }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const pathname = usePathname();
-
   const isBlogRoute = pathname?.startsWith("/blog");
+  const isContactRoute = pathname === "/contact";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,7 +26,7 @@ export default function Navbar({ onOpenAudit }: NavbarProps) {
         setIsScrolled(false);
       }
 
-      if (!isBlogRoute) {
+      if (!isBlogRoute && !isContactRoute) {
         const sections = ["home", "services", "about", "blog", "contact"];
         const scrollPos = window.scrollY + 200;
         for (const s of sections) {
@@ -45,14 +45,14 @@ export default function Navbar({ onOpenAudit }: NavbarProps) {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isBlogRoute]);
+  }, [isBlogRoute, isContactRoute]);
 
   const navLinks = [
     { name: "Home", href: "/#home", id: "home" },
     { name: "Services", href: "/#services", id: "services" },
     { name: "About", href: "/#about", id: "about" },
     { name: "Blog", href: "/blog", id: "blog" },
-    { name: "Contact", href: "/#contact", id: "contact" },
+    { name: "Contact", href: "/contact", id: "contact" },
   ];
 
   return (
@@ -86,7 +86,9 @@ export default function Navbar({ onOpenAudit }: NavbarProps) {
         {/* Center: Desktop Navigation Links */}
         <div className="hidden md:flex items-center gap-1 sm:gap-3">
           {navLinks.map((link) => {
-            const isActive = isBlogRoute
+            const isActive = isContactRoute
+              ? link.id === "contact"
+              : isBlogRoute
               ? link.id === "blog"
               : activeSection === link.id;
 
@@ -113,10 +115,10 @@ export default function Navbar({ onOpenAudit }: NavbarProps) {
           })}
         </div>
 
-        {/* Right: Let's Talk Button */}
+        {/* Right: Let's Talk Button -> Points to dedicated /contact landing page */}
         <div className="hidden md:flex items-center">
           <Link
-            href="/#contact"
+            href="/contact"
             className="group relative inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs sm:text-sm font-semibold text-black bg-cyan-400 hover:bg-cyan-300 transition-all duration-300 shadow-[0_0_15px_rgba(0,240,255,0.5)] hover:shadow-[0_0_25px_rgba(0,240,255,0.8)] hover:scale-105"
           >
             <span>Let&apos;s Talk</span>
@@ -146,7 +148,9 @@ export default function Navbar({ onOpenAudit }: NavbarProps) {
           >
             <div className="flex flex-col gap-2">
               {navLinks.map((link) => {
-                const isActive = isBlogRoute
+                const isActive = isContactRoute
+                  ? link.id === "contact"
+                  : isBlogRoute
                   ? link.id === "blog"
                   : activeSection === link.id;
 
@@ -169,7 +173,7 @@ export default function Navbar({ onOpenAudit }: NavbarProps) {
 
             <div className="pt-2 border-t border-slate-800">
               <Link
-                href="/#contact"
+                href="/contact"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-semibold text-black bg-cyan-400 hover:bg-cyan-300 transition-all shadow-[0_0_15px_rgba(0,240,255,0.4)]"
               >

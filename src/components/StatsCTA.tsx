@@ -43,10 +43,10 @@ function CounterNumber({ target, suffix = "" }: { target: number; suffix?: strin
 
 export default function StatsCTA({ onOpenAudit }: StatsCTAProps) {
   const statsList = [
-    { value: 150, suffix: "+", label: "Projects Completed" },
+    { value: 50, suffix: "+", label: "Projects Completed" },
     { value: 80, suffix: "+", label: "Happy Clients" },
-    { value: 3, suffix: "+", label: "Years Experience" },
-    { value: 15, suffix: "+", label: "Industries Served" },
+    { value: 1, suffix: "+", label: "Years Experience" },
+    { value: 5, suffix: "+", label: "Industries Served" },
   ];
 
   return (

@@ -12,16 +12,16 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   const [isExiting, setIsExiting] = useState(false);
 
   // Exact 4-stage synchronization:
-  // 1. RUNNING (0% - 78%): Reaper chases, Developer furiously types.
-  // 2. WINDUP (79% - 88%): Reaper reaches chair, raises scythe high. Developer stops typing & panics.
-  // 3. SLASHING (89% - 93%): Scythe rapidly swings down in a high-speed arc towards the desk.
-  // 4. IMPACT / KO (94% - 100%): Scythe slams into the desk/keyboard! EXACTLY now, developer collapses backward with sparks!
-  const isWindup = progress >= 79 && progress < 89;
-  const isSlashing = progress >= 89 && progress < 94;
+  // 1. RUNNING (0% - 75%): Reaper chases forward.
+  // 2. WINDUP (76% - 87%): Reaper closes in, raises scythe high. Developer notices & panics.
+  // 3. SLASH & LEAP (88% - 93%): Reaper leaps forward right up to the desk and swings scythe down!
+  // 4. IMPACT (94% - 100%): Reaper stands right at the desk, scythe slams into desk, developer collapses!
+  const isWindup = progress >= 76 && progress < 88;
+  const isSlashing = progress >= 88 && progress < 94;
   const isImpact = progress >= 94;
 
   useEffect(() => {
-    const duration = 3000; // ~3.0 seconds
+    const duration = 3000; // ~3.0 seconds total
     const startTime = performance.now();
 
     let animationFrameId: number;
@@ -30,20 +30,20 @@ export default function Preloader({ onComplete }: PreloaderProps) {
       const elapsed = currentTime - startTime;
       const rawProgress = Math.min(elapsed / duration, 1);
 
-      // Custom easing curve for perfect dramatic timing:
-      // - Fast approach to 78%
-      // - Suspenseful windup pause from 79% to 88%
-      // - Lightning fast slash swing from 89% to 94%
-      // - Impact hold & aftermath from 94% to 100%
+      // Custom easing curve:
+      // - 0 to 0.65: Cruise up to 75%
+      // - 0.65 to 0.82: Windup suspense from 75% to 87%
+      // - 0.82 to 0.88: Fast strike & lunge forward from 87% to 94%
+      // - 0.88 to 1.0: Impact & hold at the desk from 94% to 100%
       let easedProgress: number;
       if (rawProgress < 0.65) {
-        easedProgress = (rawProgress / 0.65) * 78;
+        easedProgress = (rawProgress / 0.65) * 75;
       } else if (rawProgress < 0.82) {
-        easedProgress = 78 + ((rawProgress - 0.65) / 0.17) * 10; // Windup (78 -> 88)
+        easedProgress = 75 + ((rawProgress - 0.65) / 0.17) * 12; // Windup (75 -> 87)
       } else if (rawProgress < 0.88) {
-        easedProgress = 88 + ((rawProgress - 0.82) / 0.06) * 6; // Fast slash (88 -> 94)
+        easedProgress = 87 + ((rawProgress - 0.82) / 0.06) * 7; // Fast strike to desk (87 -> 94)
       } else {
-        easedProgress = 94 + ((rawProgress - 0.88) / 0.12) * 6; // Impact (94 -> 100)
+        easedProgress = 94 + ((rawProgress - 0.88) / 0.12) * 6; // Impact at desk (94 -> 100)
       }
 
       const currentVal = Math.min(Math.round(easedProgress), 100);
@@ -53,14 +53,14 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         animationFrameId = requestAnimationFrame(updateProgress);
       } else {
         setProgress(100);
-        // Let the user see the fallen developer and embedded scythe for 800ms before smooth fade out
+        // Let user see the Reaper standing triumphant at the desk for 850ms
         setTimeout(() => {
           setIsExiting(true);
           setTimeout(() => {
             setIsFinished(true);
             if (onComplete) onComplete();
           }, 600);
-        }, 800);
+        }, 850);
       }
     };
 
@@ -91,8 +91,9 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
   if (isFinished) return null;
 
-  // The red progress bar fills up smoothly to 80% (right behind the chair)
-  const fillWidthPercent = Math.min((progress / 100) * 80, 80);
+  // The red progress bar and the Reaper now travel all the way up to 90.5% (right at the desk edge!)
+  // This completely eliminates the empty white gap and places the Reaper right beside the desk!
+  const fillWidthPercent = Math.min((progress / 100) * 90.5, 90.5);
 
   return (
     <div
@@ -129,7 +130,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         <div className="relative w-full h-24 flex items-end justify-start">
           {/* Base Track Background (Solid White with rounded corners) */}
           <div className="relative w-full h-6 bg-white rounded-sm overflow-hidden">
-            {/* Red Filled Progress Bar - stops smoothly right behind the chair */}
+            {/* Red Filled Progress Bar - Expands all the way right up to the desk! */}
             <div
               className="h-full bg-[#dc2626] transition-all duration-75 ease-linear rounded-l-sm"
               style={{ width: `${fillWidthPercent}%` }}
@@ -138,17 +139,16 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
           {/* 
             Grim Reaper Silhouette:
-            - Rides at the tip of the red progress bar.
-            - Stops right behind the chair.
+            - Moves smoothly across the bar and comes RIGHT UP to the desk!
             - Windup: Raises scythe high.
-            - Slash: Swings scythe down right onto the desk.
-            - Impact: Scythe lands and lodges onto the desk.
+            - Slash: Swings scythe directly down onto the desk surface.
+            - Impact: Stands right next to the desk with the scythe embedded in the desk!
           */}
           <div
             className="absolute bottom-6 transition-all duration-75 ease-linear pointer-events-none z-20"
             style={{
               left: `${fillWidthPercent}%`,
-              transform: `translateX(${isImpact || isSlashing ? "-52%" : "-75%"})`,
+              transform: `translateX(${isImpact || isSlashing ? "-48%" : "-75%"})`,
             }}
           >
             <div
@@ -183,15 +183,15 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
                 {/* 
                   Animated Scythe Assembly:
-                  - Windup: rotates up-back (-48deg)
-                  - Slashing / Impact: swings all the way forward & down (64deg) to slam directly on the desk!
+                  - Windup: Rotates up & back (-48deg)
+                  - Slash / Impact: Swings directly down and slams onto the desk (66deg)!
                 */}
                 <g
                   className="origin-[48px_48px] transition-transform duration-100 ease-in"
                   style={{
                     transform:
                       isImpact || isSlashing
-                        ? "rotate(65deg) translate(18px, -2px)"
+                        ? "rotate(66deg) translate(20px, 0px)"
                         : isWindup
                         ? "rotate(-48deg) translate(-10px, -6px)"
                         : "rotate(0deg)",
@@ -223,11 +223,11 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                   />
                 </g>
 
-                {/* Slash trail arc when swinging down onto the desk */}
+                {/* Slash trail arc right on top of the desk */}
                 {(isSlashing || isImpact) && (
                   <g className="animate-slash-flash">
                     <path
-                      d="M65 -5 Q115 15 110 65"
+                      d="M60 -5 Q115 15 112 65"
                       stroke="#ff0033"
                       strokeWidth="3.5"
                       strokeLinecap="round"
@@ -235,9 +235,9 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                       className="filter drop-shadow-[0_0_10px_#ff0033]"
                     />
                     <line
-                      x1="80"
+                      x1="75"
                       y1="10"
-                      x2="112"
+                      x2="114"
                       y2="50"
                       stroke="#ffffff"
                       strokeWidth="2"
@@ -251,11 +251,9 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
           {/* 
             Developer at Desk (Right End)
-            - Solid white silhouette attached to the white track.
-            - Types until Reaper reaches windup.
-            - In windup: freezes and panics.
-            - In slashing: anticipates the strike.
-            - ON IMPACT: Blade slams on desk, developer collapses backward!
+            - Attached to the right end.
+            - Reaper comes right up next to the desk to strike!
+            - Developer gets knocked out backward onto the chair.
           */}
           <div
             className={`absolute right-0 bottom-0 pointer-events-none z-10 ${
@@ -298,7 +296,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
               <g
                 className="origin-[35px_68px] transition-transform duration-300"
                 style={{
-                  transform: isImpact ? "rotate(-12deg)" : "rotate(0deg)",
+                  transform: isImpact ? "rotate(-14deg)" : "rotate(0deg)",
                 }}
               >
                 {/* Chair Backrest */}
@@ -323,10 +321,10 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
               {/* 
                 Developer Body:
-                - Types during 0% - 78%
-                - Panics during 79% - 88%
-                - Prepares/freezes during 89% - 93%
-                - Collapses ONLY upon impact at >= 94%!
+                - Types during 0% - 75%
+                - Panics during 76% - 87%
+                - Freezes during 88% - 93%
+                - Collapses backward directly upon impact at >= 94%!
               */}
               <g
                 className="origin-[42px_55px] transition-transform duration-200 ease-out"
@@ -401,26 +399,26 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                 )}
               </g>
 
-              {/* Slash impact Sparks directly ON the desk & developer upon landing */}
+              {/* Slash Impact Sparks right on the desk & monitor */}
               {isImpact && (
                 <g className="animate-slash-flash">
-                  {/* Blade impact point on desk */}
-                  <circle cx="68" cy="30" r="3.5" fill="#ff0033" />
-                  <circle cx="68" cy="30" r="1.5" fill="#ffffff" />
-                  {/* Slash cut mark on desk */}
+                  {/* Blade strike mark right on the desk edge */}
+                  <circle cx="70" cy="30" r="3.5" fill="#ff0033" />
+                  <circle cx="70" cy="30" r="1.5" fill="#ffffff" />
+                  {/* Cut mark */}
                   <line
-                    x1="62"
+                    x1="65"
                     y1="25"
-                    x2="74"
+                    x2="77"
                     y2="35"
                     stroke="#ff0033"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                   />
-                  {/* Sparks */}
-                  <circle cx="60" cy="20" r="1.5" fill="#ff0033" />
-                  <circle cx="76" cy="22" r="1.5" fill="#ffaa00" />
-                  <circle cx="55" cy="28" r="1.2" fill="#ffffff" />
+                  {/* Sparks flying */}
+                  <circle cx="62" cy="20" r="1.5" fill="#ff0033" />
+                  <circle cx="78" cy="22" r="1.5" fill="#ffaa00" />
+                  <circle cx="58" cy="28" r="1.2" fill="#ffffff" />
                 </g>
               )}
 

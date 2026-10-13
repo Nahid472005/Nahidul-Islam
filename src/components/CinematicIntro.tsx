@@ -8,23 +8,23 @@ interface CinematicIntroProps {
 }
 
 export default function CinematicIntro({ onComplete }: CinematicIntroProps) {
-  // Phase 1: "Hello, World." typing & blinking cursor (~3.0s)
+  // Phase 1: "Nahidul Islam" typing & blinking cursor (~3.0s)
   // Phase 2: Name reveal "NAHIDUL ISLAM" in 3D metallic style (~4.5s)
   // Phase 3: Smooth cinematic exit (~0.8s)
   const [phase, setPhase] = useState<"hello" | "name" | "exit">("hello");
   const [typedText, setTypedText] = useState("");
-  const fullHello = "Hello, World.";
+  const fullName = "Nahidul Islam";
 
   useEffect(() => {
-    // Type out "Hello, World." at deliberate pacing
+    // Type out "Nahidul Islam" at deliberate pacing
     let currentIndex = 0;
     const typeInterval = setInterval(() => {
-      if (currentIndex < fullHello.length) {
-        setTypedText(fullHello.slice(0, currentIndex + 1));
+      if (currentIndex < fullName.length) {
+        setTypedText(fullName.slice(0, currentIndex + 1));
         currentIndex++;
       } else {
         clearInterval(typeInterval);
-        // Let "Hello, World." breathe and blink for 1.8 seconds
+        // Let "Nahidul Islam" breathe and blink for 1.8 seconds
         setTimeout(() => {
           setPhase("name");
           // Hold the grand "NAHIDUL ISLAM" reveal for 4.2 seconds

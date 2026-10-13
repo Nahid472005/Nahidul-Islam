@@ -20,7 +20,8 @@ import WorkModal from "@/components/modals/WorkModal";
 import AuditModal from "@/components/modals/AuditModal";
 import CVModal from "@/components/modals/CVModal";
 import LegalModal from "@/components/modals/LegalModal";
-import Preloader from "@/components/Preloader";
+import InteractiveGameSection from "@/components/InteractiveGameSection";
+import CinematicIntro from "@/components/CinematicIntro";
 
 import { VideoItem } from "@/data/videos";
 import { ServiceItem } from "@/data/services";
@@ -39,8 +40,8 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen w-full bg-black text-white selection:bg-cyan-500/30 selection:text-white">
-      {/* Intro Death vs Developer Preloader Animation */}
-      <Preloader />
+      {/* Cinematic Intro: Hello World -> Nahidul Islam 3D Metallic Reveal */}
+      <CinematicIntro />
 
       {/* 
         ABSOLUTE RULE:
@@ -68,6 +69,12 @@ export default function Home() {
 
         {/* About Me Section */}
         <AboutMe />
+
+        {/* Interactive Breakout Mini-Game & 3D Glowing Card Section (After Sections) */}
+        <InteractiveGameSection
+          onOpenContact={() => setIsAuditModalOpen(true)}
+          onOpenWork={() => setIsWorkModalOpen(true)}
+        />
 
         {/* YouTube Section */}
         <YouTubeSection onSelectVideo={(vid) => setSelectedVideo(vid)} />
